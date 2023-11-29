@@ -1,26 +1,34 @@
 package com.storage;
 
+
 import com.storage.Entities.KVPair;
-import com.storage.service.StorageComponentService;
-import com.storage.utils.KVPairRepository;
+import com.storage.utils.DBOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/keys")
 public class Controller {
+
+    DBOperations<String, String> service;
+
     @Autowired
-    StorageComponentService service;
+    Controller(DBOperations<String, String> lsm) {
+        service = lsm;
+    }
 
     @GetMapping("/get/{key}")
-    public KVPair get(@PathVariable String key){
+    public String get(@PathVariable String key) {
         return service.get(key);
     }
 
     @RequestMapping("/set/{key}/{value}")
-    public KVPair set(@PathVariable String key, @PathVariable String value) {
+    public String set(@PathVariable String key, @PathVariable String value) throws IOException {
         KVPair pair = new KVPair(key, value);
         service.set(pair);
-        return pair;
+        return value;
     }
+
 }

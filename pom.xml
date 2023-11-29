@@ -56,11 +56,11 @@
         </dependency>
 
         <dependency>
-            <artifactId>com.highload</artifactId>
-            <groupId>StorageComponent</groupId>
+            <artifactId>StorageComponent</artifactId>
+            <groupId>com.storagecomp</groupId>
             <scope>system</scope>
             <version>0.0.1-SNAPSHOT</version>
-            <systemPath>/Users/artemparfenov/Desktop/StorageComponent/target/StorageComponent-0.0.1-SNAPSHOT.jar</systemPath>
+            <systemPath>${project.basedir}\StorageComponent-0.0.1-SNAPSHOT.jar</systemPath>
         </dependency>
 
     </dependencies>
