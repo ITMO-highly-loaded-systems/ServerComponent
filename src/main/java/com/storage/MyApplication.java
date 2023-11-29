@@ -18,8 +18,11 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import java.io.FileReader;
+import java.util.Properties;
 import java.io.File;
 import java.io.IOException;
+import java.io.FileInputStream;
 
 
 @EnableScheduling
@@ -31,8 +34,12 @@ public class MyApplication {
 
     @Bean
     public LSM<String, String> createLsm() throws IOException {
-        String dir = "C:\\Users\\Core i5-8250\\Desktop\\github\\HighLoad";
-        int blockSize = 10;
+        FileReader reader = new FileReader("src/main/resources/application.properties");
+        Properties lsmProp = new Properties();
+        lsmProp.load(reader);
+
+        String dir = lsmProp.getProperty("dir");
+        int blockSize = Integer.parseInt(lsmProp.getProperty("blockSize"));
         IMemTable<String, String> memTable = new MemTable<String, String>(3);
         var fs2 = new DiskFileSystem(new File(dir), new GzipCompressor());
         var fs = new DiskFileSystem(new File(dir), new GzipCompressor());
