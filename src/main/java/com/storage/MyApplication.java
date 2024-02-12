@@ -18,11 +18,11 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.io.FileReader;
-import java.util.Properties;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Properties;
 
 
 @EnableScheduling
@@ -33,7 +33,8 @@ public class MyApplication {
     }
 
     @Bean
-    public LSM<String, String> createLsm() throws IOException {
+    public ILSM<String, String> createLsm() throws IOException, InterruptedException {
+
         FileReader reader = new FileReader("src/main/resources/application.properties");
         Properties lsmProp = new Properties();
         lsmProp.load(reader);
@@ -47,6 +48,31 @@ public class MyApplication {
         IMemTable<String, String> memTableDecorator = new MemTableDecorator<String, String>(memTable, wal);
         var ssService = new SsService(fs, blockSize, "-", ";");
         var ssTable = new SSManager<String, String>(new SSTableNameGenerator(), ssService);
-        return new LSM<>(memTableDecorator, ssTable);
+
+        ILSM<String, String> res = new LSM<>(memTableDecorator, ssTable);
+
+        String type = lsmProp.getProperty("type");
+        switch (type) {
+            case "master": {
+                var replica = lsmProp.getProperty("replicaIp");
+                var list = new ArrayList<String>();
+                if (replica != null && replica != "") {
+                    list.add(replica);
+                }
+                res = new MasterLSM<String, String>(res, list);
+                break;
+            }
+            case "replica": {
+                var master = lsmProp.getProperty("masterIp");
+                res = new ReplicaLSM<String, String>(res, master);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        return res;
+
     }
 }
